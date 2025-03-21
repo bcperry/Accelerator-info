@@ -1,0 +1,9 @@
+jupyter
+notebook
+pandas
+openai>=1.0.0
+requests
+python-dotenv
+PyGithub
+markdown
+beautifulsoup4
