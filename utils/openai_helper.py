@@ -72,9 +72,57 @@ class AzureOpenAIAnalyzer:
     
     def _create_analysis_prompt(self, repo_data: Dict[str, Any], content: str) -> str:
         """Create a detailed prompt for Azure OpenAI analysis"""
+
+
+        ask_sage_info = """a web based tool that provides access to large language models. including Azure OpenAI,
+            It is a paid, licence based service.
+            It is not Government Owned,
+            It is RBAC enabled,
+            It is deployed in Azure to Azure Government Cloud,
+            It does provide chat history,
+            It does allow file upload, 
+            It does enable agents,
+            It does not enables the use of organization data, 
+            It does offer external APIs 
+            It does offer tool usage"""
+
+        nipr_gpt_info = """a web based tool that provides access to large language models.
+            It is Government Owned,
+            It is RBAC enabled,
+            It does provide chat history,
+            It does allow file upload, 
+            It does not enable agents,
+            It does not enables the use of organization data, 
+            It does not offer external APIs 
+            It does not offer tool usage"""
+
+        camo_gpt_info = """a web based tool that provides access to large language models.
+            It is Government Owned,
+            It is RBAC enabled,
+            It does provide chat history,
+            It does allow file upload, 
+            It does not enable agents,
+            It does not enables the use of organization data, 
+            It does offer external APIs 
+            It does not offer tool usage"""
+        
+        aiflow_info = """a web based tool that provides access to large language models.
+            It is Government Owned,
+            It is RBAC enabled,
+            It is deployed in Azure to Azure Government Cloud,
+            It does provide chat history,
+            It does allow file upload, 
+            It does enable agents,
+            It does enable the use of organization data, 
+            It does offer external APIs 
+            It does offer tool usage"""
+
+
         return f"""
 You are a cloud architecture analyst specializing in Azure solutions. 
 I need you to analyze the following GitHub repository and extract specific information.
+Assume the repository ownership is {repo_data['owner']} and the repository name is {repo_data['name']}.  
+If not explicitly stated, assume the repository is not owned by the US Government.
 
 Repository: {repo_data['url']}
 Owner: {repo_data['owner']}
@@ -86,18 +134,20 @@ Here is the content from the repository:
 
 Based on this content, answer the following questions in JSON format:
 
-1. Is RBAC (Role-Based Access Control) enabled in this solution?
+1. Is RBAC (Role-Based Access Control) enabled in this solution? Specifically, RBAC within the application (for uploading data, etc.), 
+not Azure RBAC to the services.
 2. Is this solution ready for Azure Government Cloud?
-3. Does this solution properly handle Azure Secrets?
+3. Is this solution ready for Azure Government SECRET or TOP SECRET Cloud?
 4. Does this solution maintain chat history?
 5. How many different Azure services are used in this solution?
 6. Does this solution include architecture diagrams? If yes, describe them.
-7. What are the key differentiators of this solution from AskSage?
-8. What are the key differentiators of this solution from NIPRGPT?
-9. What are the key differentiators of this solution from CamoGPT?
-10. What deployment method does this solution use?
-11. What is the estimated cost to deploy and run this solution?
-12. Any additional notes or observations about this solution?
+7. What are the key differentiators of this solution from AskSage {ask_sage_info}?
+8. What are the key differentiators of this solution from NIPRGPT {nipr_gpt_info}?
+9. What are the key differentiators of this solution from CamoGPT {camo_gpt_info}?
+10. What are the key differentiators of this solution from AIFLow {aiflow_info}?
+11. What deployment method does this solution use?
+12. What is the estimated cost to deploy and run this solution?
+13. Any additional notes or observations about this solution?
 
 Format your response as a valid JSON with the following keys:
 rbac_enabled, azure_gov_ready, azure_secret_ready, chat_history, azure_services_count, 
@@ -105,6 +155,9 @@ architecture_diagram_present, differentiators_from_asksage, differentiators_from
 differentiators_from_camogpt, deployment_method, costs_estimate, notes
 
 For each answer, provide a brief explanation and confidence level (high, medium, low).
+Please ensure the JSON is well-structured and valid. 
+use the key "answer" for the answer, "explanation" for the explanation, and "confidence" for the confidence level.
+If the answer is a boolean, use "true" or "false" (without quotes).
 """
     
     def _get_openai_analysis(self, prompt: str) -> str:
